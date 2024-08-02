@@ -1,0 +1,64 @@
+import React, { useState } from 'react';
+import axios from 'axios';
+
+function App() {
+  const [input, setInput] = useState('');
+  const [response, setResponse] = useState({});
+  const [selectedOptions, setSelectedOptions] = useState([]);
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    try {
+      const jsonData = JSON.parse(input);
+      axios.post('/bfhl', jsonData)
+        .then((response) => {
+          setResponse(response.data);
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleSelectChange = (event) => {
+    const selectedOptions = Array.from(event.target.selectedOptions, (option) => option.value);
+    setSelectedOptions(selectedOptions);
+  };
+
+  const renderResponse = () => {
+    if (selectedOptions.includes('Alphabets')) {
+      return <div>Alphabets: {response.alphabets.join(', ')}</div>;
+    }
+    if (selectedOptions.includes('Numbers')) {
+      return <div>Numbers: {response.numbers.join(', ')}</div>;
+    }
+    if (selectedOptions.includes('Highest Alphabet')) {
+      return <div>Highest Alphabet: {response.highest_alphabet[0]}</div>;
+    }
+    return null;
+  };
+
+  return (
+    <div>
+      <h1>BFHL Challenge</h1>
+      <form onSubmit={handleSubmit}>
+        <input type="text" value={input} onChange={(event) => setInput(event.target.value)} />
+        <button type="submit">Submit</button>
+      </form>
+      {response.is_success && (
+        <div>
+          <select multiple onChange={handleSelectChange}>
+            <option value="Alphabets">Alphabets</option>
+            <option value="Numbers">Numbers</option>
+            <option value="Highest Alphabet">Highest Alphabet</option>
+          </select>
+          {renderResponse()}
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default App;
